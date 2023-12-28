@@ -1,10 +1,28 @@
 nextflow.enable.dsl=2
 
 params.ldmDir="/path/to/ldm/"
-params.ma="/path/to/ma"
+params.stat="/path/to/ma"
+params.fscript="format/script"
 params.thread=16
+params.outdir="outdir"
 
-process generateLDMList {
+process prepare_ma {
+    publishDir params.outdir, mode: "copy"
+
+    input:
+    path stat
+    path ldmDir
+
+    output:
+    path "*.ma"
+
+    script:
+    """
+    ${params.fscript} $stat $ldmDir
+    """
+}
+
+process generate_LDMList {
     input:
     path ldmDir
 
@@ -19,27 +37,29 @@ process generateLDMList {
     """
 }
 
-process run_gctb {
-    publishDir ".", mode: "copy"
+process gctb_sbayesS {
+    publishDir params.outdir, mode: "copy"
 
     input:
     path ldmDir
     path ldmList
     path ma
-    var thread
 
     output:
-    path "test.log"
+    path "${ma.baseName}.*"
 
     script:
     """
-    gctb --sbayes S --thread $thread --mldm $ldmList --gwas-summary $ma --out $ma --impute-n > test.log
+    gctb --sbayes S --thread ${params.thread} --mldm $ldmList --gwas-summary $ma --out ${ma.baseName} --impute-n
     """
 }
     
 workflow {
-    inputMA = Channel.fromPath(params.ma)
+    stat = Channel.fromPath(params.stat)
+    fscript = Channel.fromPath(params.fscript)
     ldmDir = Channel.fromPath(params.ldmDir)
-    mlist = generateLDMList(ldmDir)
-    run_gctb(ldmDir, mlist, inputMA)
+
+    ma = prepare_ma(stat, ldmDir)
+    mlist = generate_LDMList(ldmDir)
+    gctb_sbayesS(ldmDir, mlist, ma)
 }
