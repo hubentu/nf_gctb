@@ -3,26 +3,24 @@
 args <- commandArgs(trailingOnly=TRUE)
 
 sfile <- args[1]
-ldm <- args[2]
+info_f <- args[2]
 
 library(tidyverse)
 
 ## info
-info_f <- list.files(ldm, ".*_chr.*.info$", full.names = TRUE)
-info <- c()
-for(i in info_f){
-    l1 <- read_table(i, n_max=1, col_names = FALSE, show_col_types = F)
-    if(l1[1,1]!="Chrom"){
-        i1 <- read_table(i, col_names = F)
-        colnames(i1)[1:6] <- c("Chrom", "ID", "GenPos", "PhysPos", "A1", "A2")
-    }else{
-        i1 <- read_table(i, col_names = T)
-    }
-    i1 <- i1 |> rowwise() |>
-        mutate(var_sort = paste(c(Chrom, PhysPos, sort(c(A1, A2))), collapse="_")) |>
-        select(ID, var_sort)
-    info <- rbind(info, i1)
+## info_f <- list.files(ldm, ".*_chr.*.info$", full.names = TRUE)
+l1 <- read_table(info_f, n_max=1, col_names = FALSE, show_col_types = F)
+if(l1[1,1]!="Chrom"){
+    info <- read_table(info_f, col_names = F)
+    colnames(info)[1:6] <- c("Chrom", "ID", "GenPos", "PhysPos", "A1", "A2")
+}else{
+    info <- read_table(info_f, col_names = T)
 }
+info <- info |> rowwise() |>
+    mutate(var_sort = paste(c(Chrom, PhysPos, sort(c(A1, A2))), collapse="_")) |>
+    select(ID, var_sort)
+
+print(head(info))
 
 fun <- DataFrameCallback$new(function(x, pos){
     d1 <- x |>

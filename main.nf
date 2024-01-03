@@ -6,19 +6,20 @@ params.fscript="format/script"
 params.thread=16
 params.outdir="outdir"
 
+
 process prepare_ma {
     publishDir params.outdir, mode: "copy"
 
     input:
     path stat
-    path ldmDir
+    path info
 
     output:
     path "*.ma"
 
     script:
     """
-    ${params.fscript} $stat $ldmDir
+    ${params.fscript} $stat $info
     """
 }
 
@@ -57,10 +58,10 @@ process gctb_sbayesS {
     
 workflow {
     stat = Channel.fromPath(params.stat)
-    fscript = Channel.fromPath(params.fscript)
     ldmDir = Channel.fromPath(params.ldmDir)
+    info = Channel.fromPath("${params.ldmDir}/*_chr*.info").collectFile(name: "all.info")
 
-    ma = prepare_ma(stat, ldmDir)
+    ma = prepare_ma(stat, info)
     mlist = generate_LDMList(ldmDir)
     gctb_sbayesS(ldmDir, mlist, ma)
 }
