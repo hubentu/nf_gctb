@@ -7,7 +7,6 @@ params.thread=16
 params.outdir="outdir"
 
 process prepare_ma {
-    disk '500 GB'
     publishDir params.outdir, mode: "copy"
 
     input:
@@ -39,7 +38,7 @@ process generate_LDMList {
 }
 
 process gctb_sbayesS {
-    disk '500 GB'
+    cpus params.thread
     publishDir params.outdir, mode: "copy"
 
     input:
