@@ -20,7 +20,7 @@ info <- info |> rowwise() |>
     mutate(var_sort = paste(c(Chrom, PhysPos, sort(c(A1, A2))), collapse="_")) |>
     select(ID, var_sort)
 
-print(head(info))
+print(tibble(info))
 
 fun <- DataFrameCallback$new(function(x, pos){
     d1 <- x |>

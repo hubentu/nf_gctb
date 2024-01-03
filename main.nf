@@ -23,28 +23,12 @@ process prepare_ma {
     """
 }
 
-process generate_LDMList {
-    input:
-    path ldmDir
-
-    output:
-    path "ldm.mlist"
-    
-    script:
-    """
-    for i in \$(seq 1 22); do
-        echo $ldmDir/*_chr\${i}[_.]*.bin | sed 's/.bin\$//'
-    done > ldm.mlist
-    """
-}
-
 process gctb_sbayesS {
     cpus params.thread
     publishDir params.outdir, mode: "copy"
 
     input:
     path ldmDir
-    path ldmList
     path ma
 
     output:
@@ -52,7 +36,8 @@ process gctb_sbayesS {
 
     script:
     """
-    gctb --sbayes S --thread ${params.thread} --mldm $ldmList --gwas-summary $ma --out ${ma.baseName} --impute-n
+    ls $ldmDir/*.bin | sed 's/.bin\$//' > ldm.list
+    gctb --sbayes S --thread ${params.thread} --mldm ldm.list --gwas-summary $ma --out ${ma.baseName} --impute-n
     """
 }
     
@@ -62,6 +47,5 @@ workflow {
     info = Channel.fromPath("${params.ldmDir}/*hr*.info").collectFile(name: "all.info")
 
     ma = prepare_ma(stat, info)
-    mlist = generate_LDMList(ldmDir)
-    gctb_sbayesS(ldmDir, mlist, ma)
+    gctb_sbayesS(ldmDir, ma)
 }
