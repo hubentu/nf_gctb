@@ -59,7 +59,7 @@ process gctb_sbayesS {
 workflow {
     stat = Channel.fromPath(params.stat)
     ldmDir = Channel.fromPath(params.ldmDir)
-    info = Channel.fromPath("${params.ldmDir}/*_chr*.info").collectFile(name: "all.info")
+    info = Channel.fromPath("${params.ldmDir}/*hr*.info").collectFile(name: "all.info")
 
     ma = prepare_ma(stat, info)
     mlist = generate_LDMList(ldmDir)
