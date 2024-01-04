@@ -5,7 +5,7 @@ params.stat="/path/to/ma"
 params.fscript="format/script"
 params.thread=16
 params.outdir="outdir"
-
+params.gctb_mem="256.GB"
 
 process prepare_ma {
     publishDir params.outdir, mode: "copy"
@@ -25,6 +25,8 @@ process prepare_ma {
 
 process gctb_sbayesS {
     cpus params.thread
+    memory params.gctb_mem
+
     publishDir params.outdir, mode: "copy"
 
     input:
