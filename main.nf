@@ -22,7 +22,7 @@ process prepare_ma {
     """
     mv $stat ${stat}.txt
     chmod +x $fscript
-    $fscript ${stat}.txt $info
+    ./$fscript ${stat}.txt $info
     """
 }
 
