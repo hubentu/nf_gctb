@@ -7,6 +7,7 @@ params.thread=16
 params.outdir="outdir"
 params.gctb_mem="256.GB"
 params.ext="/dev/null"
+params.robust=true
 
 process prepare_ma {
     publishDir params.outdir, mode: "copy"
@@ -25,7 +26,6 @@ process prepare_ma {
     chmod +x $fscript
     ./$fscript $stat $info $ext
     rm $stat
-    rm $ext
     """
 }
 
@@ -43,9 +43,10 @@ process gctb_sbayesS {
     path "${ma.baseName}.*"
 
     script:
+    def robust = params.robust == true ? "--robust" : ''
     """
     ls $ldmDir/*.bin | sed 's/.bin\$//' > ldm.list
-    gctb --sbayes S --thread ${params.thread} --mldm ldm.list --gwas-summary $ma --out ${ma.baseName} --impute-n
+    gctb --sbayes S --thread ${params.thread} --mldm ldm.list --gwas-summary $ma --out ${ma.baseName} --impute-n $robust
     """
 }
     
